@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { API_URL } from "../utils/constants";
-
-const apiBase = API_URL.replace(/\/$/, "");
+import { useAuth } from "../context/AuthContext";
 
 const comingSoon = [
   { name: "Tetris Blitz", badge: "Coming soon" },
@@ -10,50 +7,33 @@ const comingSoon = [
 ];
 
 export default function HomePage() {
-  const [topThree, setTopThree] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const fetchTopThree = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await fetch(`${apiBase}/snake-game/top-ten`, {
-          credentials: "include",
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data?.message || "Failed to load scores");
-        setTopThree(data?.data?.topThreeScorers || []);
-      } catch (err) {
-        setError(err.message || "Failed to load scores");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTopThree();
-  }, []);
+  const { user } = useAuth();
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-8 text-slate-100 sm:px-6 lg:px-10">
       <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:flex-row lg:items-center">
-        <div className="flex-1 space-y-4">
+        <div className="flex-1/4 space-y-4">
           <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
             New drop · Arcade revival
           </div>
           <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-            Play &amp; Win
+            Beat the High Score &amp; Win
           </h1>
           <p className="max-w-xl text-sm text-slate-300 sm:text-base">
-            Quick‑hit classics with modern polish. Smash a new high score, flex on the leaderboard,
+            Quick-hit classics with modern polish. Smash a new high score, flex on the leaderboard,
             and watch for fresh games landing soon.
           </p>
+          {!user && (
+            <p className="text-xs font-semibold text-emerald-200">
+              Login or sign up to play and save your scores.
+            </p>
+          )}
         </div>
 
         <div className="flex-1 rounded-2xl bg-slate-900/60 p-5 shadow-xl shadow-emerald-900/30 ring-1 ring-emerald-500/15">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-white">
-              Built &amp; maintained by The Department of Computer Science
+              Built &amp; maintained by Department of Computer Science
             </h2>
             <a
               href="https://github.com/JiveeteshMourya"
