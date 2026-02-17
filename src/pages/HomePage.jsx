@@ -42,65 +42,28 @@ export default function HomePage() {
             New drop · Arcade revival
           </div>
           <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-            IEHE Game Arena
+            Play &amp; Win
           </h1>
           <p className="max-w-xl text-sm text-slate-300 sm:text-base">
             Quick‑hit classics with modern polish. Smash a new high score, flex on the leaderboard,
             and watch for fresh games landing soon.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              to="/snake"
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-emerald-900/40 transition hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
-            >
-              Play Snake
-              <span className="text-xs font-semibold uppercase tracking-wide text-emerald-900">
-                Live
-              </span>
-            </Link>
-            <Link
-              to="/snake"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-emerald-400 hover:text-emerald-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
-            >
-              View leaderboard
-            </Link>
-          </div>
         </div>
 
         <div className="flex-1 rounded-2xl bg-slate-900/60 p-5 shadow-xl shadow-emerald-900/30 ring-1 ring-emerald-500/15">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Top Snake scorers</h2>
-            <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
-              Live
-            </span>
-          </div>
-          <div className="mt-4 space-y-3">
-            {loading && <p className="text-sm text-slate-400">Loading leaderboard…</p>}
-            {error && <p className="text-sm text-amber-300">Error: {error}</p>}
-            {!loading && !error && topThree.length === 0 && (
-              <p className="text-sm text-slate-400">No scores yet. Play first!</p>
-            )}
-            {!loading &&
-              !error &&
-              topThree.map((entry, idx) => (
-                <div
-                  key={(entry?.username || "user") + idx}
-                  className="flex items-center justify-between rounded-xl bg-slate-800/70 px-4 py-3 ring-1 ring-slate-700/80"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-bold text-emerald-200">
-                      #{idx + 1}
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold text-white">
-                        {entry?.username || "Unknown"}
-                      </p>
-                      <p className="text-xs text-slate-400">Snake</p>
-                    </div>
-                  </div>
-                  <span className="text-sm font-semibold text-amber-300">{entry?.score ?? 0}</span>
-                </div>
-              ))}
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-white">
+              Built &amp; maintained by The Department of Computer Science
+            </h2>
+            <a
+              href="https://github.com/JiveeteshMourya"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-200 ring-1 ring-emerald-500/30 transition hover:bg-emerald-500/25"
+            >
+              GitHub
+              <span aria-hidden="true">↗</span>
+            </a>
           </div>
         </div>
       </section>
