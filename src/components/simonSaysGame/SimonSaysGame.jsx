@@ -226,7 +226,7 @@ export default function SimonSaysGame() {
               </span>
               <span className="rounded-lg bg-slate-800/70 px-3 py-2">Score: {score}</span>
               <span className="rounded-lg bg-slate-800/70 px-3 py-2">
-                Status: {running ? (isPlayingBack ? "Playing pattern" : "Your turn") : "Idle"}
+                Status: {running ? (isPlayingBack ? "Playing" : "Your turn") : "Idle"}
               </span>
             </div>
           </header>
