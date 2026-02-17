@@ -378,7 +378,7 @@ export default function SnakeGame() {
           </div>
         </div>
 
-        <aside className="order-2 w-full max-w-md rounded-2xl bg-slate-900/70 p-6 shadow-xl shadow-emerald-900/30 backdrop-blur lg:order-3">
+        <aside className="order-2 w-full rounded-2xl bg-slate-900/70 p-6 shadow-xl shadow-emerald-900/30 backdrop-blur lg:order-3">
           <h2 className="text-xl font-semibold text-white">Top 10 Players</h2>
           <p className="mb-3 text-sm text-slate-400">Best unique player scores</p>
           <ol className="space-y-2">

@@ -19,7 +19,7 @@ export default function HomePage() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`${apiBase}/snake-game/top-three`, {
+        const res = await fetch(`${apiBase}/snake-game/top-ten`, {
           credentials: "include",
         });
         const data = await res.json().catch(() => ({}));

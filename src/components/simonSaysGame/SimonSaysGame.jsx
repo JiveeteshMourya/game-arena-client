@@ -279,7 +279,7 @@ export default function SimonSaysGame() {
           {isPosting && <p className="text-xs text-emerald-300">Saving score...</p>}
         </div>
 
-        <aside className="order-2 w-full max-w-xs self-start rounded-2xl bg-slate-900/70 p-4 shadow-xl shadow-indigo-900/40 backdrop-blur lg:order-3">
+        <aside className="order-2 w-full self-start rounded-2xl bg-slate-900/70 p-4 shadow-xl shadow-indigo-900/40 backdrop-blur lg:order-3">
           <h2 className="text-xl font-semibold text-white">Top 10 Players</h2>
           <p className="mb-3 text-sm text-slate-400">Highest personal bests</p>
           <ol className="space-y-2">
