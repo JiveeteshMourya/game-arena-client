@@ -46,7 +46,7 @@ export default function SimonSaysGame() {
   const [activePad, setActivePad] = useState(null);
   const [running, setRunning] = useState(false);
   const [score, setScore] = useState(0);
-  const [topThree, setTopThree] = useState([]);
+  const [topPlayers, setTopPlayers] = useState([]);
   const [isPosting, setIsPosting] = useState(false);
   const [pressedPad, setPressedPad] = useState(null);
 
@@ -129,7 +129,7 @@ export default function SimonSaysGame() {
         } else {
           toast.success("Score saved");
         }
-        fetchTopThree();
+        fetchTopPlayers();
       } catch (err) {
         toast.error(err?.message || "Could not save score");
       } finally {
@@ -162,21 +162,27 @@ export default function SimonSaysGame() {
     }
   };
 
-  const fetchTopThree = async () => {
+  const fetchTopPlayers = async () => {
     try {
-      const res = await fetch(`${apiBase}/simon-says-game/top-three`, {
+      const res = await fetch(`${apiBase}/simon-says-game/top-ten`, {
         credentials: "include",
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.message || "Failed to load scores");
-      setTopThree(data?.data?.topThreeScorers || []);
+      const scores =
+        data?.data?.topTenScorers ||
+        data?.data?.top10Scorers ||
+        data?.data?.topScorers ||
+        data?.data?.topThreeScorers ||
+        [];
+      setTopPlayers(scores.slice(0, 10));
     } catch (err) {
       console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchTopThree();
+    fetchTopPlayers();
     return () => {
       clearPlayback();
       clearNextRound();
@@ -186,13 +192,46 @@ export default function SimonSaysGame() {
 
   return (
     <section className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-6 text-slate-100">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 lg:flex-row lg:items-start">
-        <div className="flex flex-1 flex-col gap-3 rounded-2xl bg-slate-900/70 p-5 shadow-xl shadow-indigo-900/40 backdrop-blur">
-          <header className="space-y-1">
-            <h1 className="text-2xl font-semibold text-white">Simon Says</h1>
-            <p className="text-sm text-slate-400">
-              Watch the pattern, repeat it. Each round adds a new step.
-            </p>
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-5 lg:grid-cols-[260px_1fr_240px] lg:gap-6">
+        <aside
+          id="simon-guide"
+          className="order-3 rounded-2xl bg-slate-900/70 p-5 shadow-lg shadow-indigo-900/40 backdrop-blur lg:order-1"
+        >
+          <h2 className="text-lg font-semibold text-white">How to play</h2>
+          <ul className="mt-3 space-y-2 text-sm text-slate-200">
+            <li>👀 Watch the pads flash in order.</li>
+            <li>🎯 Tap pads to repeat the exact sequence.</li>
+            <li>➕ Each round adds one new step.</li>
+            <li>⏳ 2s pause before the next pattern begins.</li>
+            <li>💾 Score saves automatically when you fail.</li>
+          </ul>
+        </aside>
+
+        <div className="order-1 flex flex-col gap-4 rounded-2xl bg-slate-900/70 p-5 shadow-xl shadow-indigo-900/40 backdrop-blur lg:order-2">
+          <header className="flex flex-wrap items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div>
+                <h1 className="text-2xl font-semibold text-white">Simon Says</h1>
+                <p className="text-sm text-slate-400">
+                  Watch the pattern, repeat it. Each round adds a new step.
+                </p>
+              </div>
+              <a
+                href="#simon-guide"
+                className="text-xs font-semibold text-indigo-200 underline decoration-indigo-400 underline-offset-4 lg:hidden"
+              >
+                How to play
+              </a>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+              <span className="rounded-lg bg-slate-800/70 px-3 py-2">
+                Level: {sequence.length || 0}
+              </span>
+              <span className="rounded-lg bg-slate-800/70 px-3 py-2">Score: {score}</span>
+              <span className="rounded-lg bg-slate-800/70 px-3 py-2">
+                Status: {running ? (isPlayingBack ? "Playing pattern" : "Your turn") : "Idle"}
+              </span>
+            </div>
           </header>
 
           <div className="grid w-full max-w-md grid-cols-2 gap-2 self-center sm:gap-3">
@@ -216,16 +255,6 @@ export default function SimonSaysGame() {
                 </button>
               );
             })}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span className="rounded-lg bg-slate-800/70 px-3 py-2">
-              Level: {sequence.length || 0}
-            </span>
-            <span className="rounded-lg bg-slate-800/70 px-3 py-2">Score: {score}</span>
-            <span className="rounded-lg bg-slate-800/70 px-3 py-2">
-              Status: {running ? (isPlayingBack ? "Playing pattern" : "Your turn") : "Idle"}
-            </span>
           </div>
 
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
@@ -253,12 +282,12 @@ export default function SimonSaysGame() {
           {isPosting && <p className="text-xs text-emerald-300">Saving score...</p>}
         </div>
 
-        <aside className="w-full max-w-xs self-start rounded-2xl bg-slate-900/70 p-4 shadow-xl shadow-indigo-900/40 backdrop-blur">
-          <h2 className="text-xl font-semibold text-white">Top 3 Players</h2>
+        <aside className="order-2 w-full max-w-xs self-start rounded-2xl bg-slate-900/70 p-4 shadow-xl shadow-indigo-900/40 backdrop-blur lg:order-3">
+          <h2 className="text-xl font-semibold text-white">Top 10 Players</h2>
           <p className="mb-3 text-sm text-slate-400">Highest personal bests</p>
           <ol className="space-y-2">
-            {topThree.length === 0 && <li className="text-sm text-slate-400">No scores yet.</li>}
-            {topThree.map((entry, idx) => (
+            {topPlayers.length === 0 && <li className="text-sm text-slate-400">No scores yet.</li>}
+            {topPlayers.map((entry, idx) => (
               <li
                 key={(entry?.username || "user") + idx}
                 className="flex items-center justify-between rounded-lg bg-slate-800/80 px-3 py-2"

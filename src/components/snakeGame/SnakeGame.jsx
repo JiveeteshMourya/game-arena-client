@@ -33,7 +33,7 @@ export default function SnakeGame() {
   const gridSizeRef = useRef(20);
 
   const [score, setScore] = useState(0);
-  const [topThree, setTopThree] = useState([]);
+  const [topPlayers, setTopPlayers] = useState([]);
   const [isPosting, setIsPosting] = useState(false);
   const [running, setRunning] = useState(false);
   const [canvasSize, setCanvasSize] = useState(400);
@@ -187,7 +187,7 @@ export default function SnakeGame() {
       } else {
         toast.success("Score saved");
       }
-      fetchTopThree();
+      fetchTopPlayers();
     } catch (err) {
       toast.error(err?.message || "Could not save score");
     } finally {
@@ -195,14 +195,20 @@ export default function SnakeGame() {
     }
   };
 
-  const fetchTopThree = async () => {
+  const fetchTopPlayers = async () => {
     try {
-      const res = await fetch(`${apiBase}/snake-game/top-three`, {
+      const res = await fetch(`${apiBase}/snake-game/top-ten`, {
         credentials: "include",
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.message || "Failed to load scores");
-      setTopThree(data?.data?.topThreeScorers || []);
+      const scores =
+        data?.data?.topTenScorers ||
+        data?.data?.top10Scorers ||
+        data?.data?.topScorers ||
+        data?.data?.topThreeScorers ||
+        [];
+      setTopPlayers(scores.slice(0, 10));
     } catch (err) {
       console.error(err);
     }
@@ -236,7 +242,7 @@ export default function SnakeGame() {
     canvas.width = canvasSize;
     canvas.height = canvasSize;
     draw();
-    fetchTopThree();
+    fetchTopPlayers();
     window.addEventListener("keydown", handleKey);
     return () => {
       stopLoop();
@@ -247,15 +253,37 @@ export default function SnakeGame() {
 
   return (
     <section className="flex min-h-[calc(100vh-4rem)] flex-col items-center bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-900 px-4 py-6 text-slate-100">
-      <div className="flex w-full max-w-5xl flex-col gap-6 lg:flex-row">
-        <div className="flex flex-1 flex-col rounded-2xl bg-slate-900/70 p-5 shadow-xl shadow-emerald-900/30 backdrop-blur">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-5 lg:grid-cols-[280px_1fr_260px] lg:gap-6">
+        <aside
+          id="snake-guide"
+          className="order-3 rounded-2xl bg-slate-900/70 p-5 shadow-lg shadow-emerald-900/30 backdrop-blur lg:order-1"
+        >
+          <h2 className="text-lg font-semibold text-white">How to play</h2>
+          <ul className="mt-3 space-y-2 text-sm text-slate-200">
+            <li>➜ Use arrow keys (desktop) or D-pad (mobile) to move.</li>
+            <li>✖ Don&apos;t hit walls or your own tail.</li>
+            <li>⏩ Eat food to grow; speed ramps up each bite.</li>
+            <li>⏯ Pause/Resume anytime; Reset starts fresh.</li>
+            <li>💾 Scores auto-save when the run ends.</li>
+          </ul>
+        </aside>
+
+        <div className="order-1 flex flex-col rounded-2xl bg-slate-900/70 p-5 shadow-xl shadow-emerald-900/30 backdrop-blur lg:order-2">
           <header className="mb-4 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h1 className="text-2xl font-semibold text-white">🐍 Snake Arena</h1>
-                <p className="text-sm text-slate-400">
-                  Swipe/tap on mobile or use arrows on desktop.
-                </p>
+              <div className="flex items-center gap-3">
+                <div>
+                  <h1 className="text-2xl font-semibold text-white">🐍 Snake Arena</h1>
+                  <p className="text-sm text-slate-400">
+                    Swipe/tap on mobile or use arrows on desktop.
+                  </p>
+                </div>
+                <a
+                  href="#snake-guide"
+                  className="text-xs font-semibold text-emerald-300 underline decoration-emerald-500 underline-offset-4 lg:hidden"
+                >
+                  How to play
+                </a>
               </div>
               <div className="flex items-center gap-2 text-xs sm:text-sm">
                 <div className="rounded-lg bg-slate-800/80 px-3 py-2">
@@ -353,12 +381,12 @@ export default function SnakeGame() {
           </div>
         </div>
 
-        <aside className="w-full max-w-md self-start rounded-2xl bg-slate-900/70 p-6 shadow-xl shadow-emerald-900/30 backdrop-blur">
-          <h2 className="text-xl font-semibold text-white">Top 3 Players</h2>
+        <aside className="order-2 w-full max-w-md rounded-2xl bg-slate-900/70 p-6 shadow-xl shadow-emerald-900/30 backdrop-blur lg:order-3">
+          <h2 className="text-xl font-semibold text-white">Top 10 Players</h2>
           <p className="mb-3 text-sm text-slate-400">Best unique player scores</p>
           <ol className="space-y-2">
-            {topThree.length === 0 && <li className="text-sm text-slate-400">No scores yet.</li>}
-            {topThree.map((entry, idx) => (
+            {topPlayers.length === 0 && <li className="text-sm text-slate-400">No scores yet.</li>}
+            {topPlayers.map((entry, idx) => (
               <li
                 key={(entry?.username || "user") + idx}
                 className="flex items-center justify-between rounded-lg bg-slate-800/80 px-3 py-2"
