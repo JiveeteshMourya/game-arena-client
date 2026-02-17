@@ -7,7 +7,7 @@ export default function ProtectedRoute({ children, redirectTo = "/login" }) {
 
   if (initializing) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-100">
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-950 text-slate-100">
         Checking session...
       </div>
     );

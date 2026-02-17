@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import toast from "../../utils/toast";
 
@@ -68,7 +68,7 @@ export default function SignUp({ onSubmit }) {
   };
 
   return (
-    <section className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-10 text-slate-100">
+    <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-950 px-4 py-8 text-slate-100">
       <div className="w-full max-w-md rounded-2xl bg-slate-900/80 p-8 shadow-xl shadow-slate-950/40 backdrop-blur">
         <header className="mb-6 text-center">
           <h1 className="text-2xl font-semibold tracking-tight text-white">Create your account</h1>
@@ -162,6 +162,16 @@ export default function SignUp({ onSubmit }) {
           >
             {submitting || authBusy ? "Signing up..." : "Sign up"}
           </button>
+
+          <p className="text-center text-sm text-slate-400">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-amber-300 transition hover:text-amber-200"
+            >
+              Log in
+            </Link>
+          </p>
         </form>
       </div>
     </section>

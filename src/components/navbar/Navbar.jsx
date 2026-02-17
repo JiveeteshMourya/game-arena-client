@@ -15,8 +15,8 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-slate-900 text-white shadow-md">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+    <header className="sticky top-0 z-50 bg-slate-900/95 text-white shadow-md backdrop-blur">
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link
           to="/"
           className="text-lg font-bold tracking-tight hover:text-amber-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
@@ -59,6 +59,18 @@ export default function Navbar() {
           <div className="hidden items-center gap-2 sm:flex">
             {user ? (
               <>
+                <Link
+                  to="/snake"
+                  className={`${buttonBase} border border-emerald-500/70 text-emerald-200 hover:border-emerald-400 hover:text-emerald-100 focus-visible:outline-amber-400`}
+                >
+                  Snake
+                </Link>
+                <Link
+                  to="/simon"
+                  className={`${buttonBase} border border-indigo-400/70 text-indigo-100 hover:border-indigo-300 hover:text-indigo-50 focus-visible:outline-amber-400`}
+                >
+                  Simon
+                </Link>
                 <span className="text-sm text-slate-200">
                   {user.username || user.email || "Logged in"}
                 </span>
@@ -99,6 +111,20 @@ export default function Navbar() {
         <div className="mt-3 flex flex-col gap-2">
           {user ? (
             <>
+              <Link
+                to="/snake"
+                className={`${buttonBase} border border-emerald-500/70 text-center text-emerald-200 hover:border-emerald-400 hover:text-emerald-100 focus-visible:outline-amber-400`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Snake
+              </Link>
+              <Link
+                to="/simon"
+                className={`${buttonBase} border border-indigo-400/70 text-center text-indigo-100 hover:border-indigo-300 hover:text-indigo-50 focus-visible:outline-amber-400`}
+                onClick={() => setMenuOpen(false)}
+              >
+                Simon
+              </Link>
               <div className="rounded-md border border-slate-800 bg-slate-800/60 px-3 py-2 text-sm text-slate-200">
                 {user.username || user.email || "Logged in"}
               </div>

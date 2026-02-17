@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import SnakeGamePage from "./pages/SnakeGamePage";
+import SimonSaysGamePage from "./pages/SimonSaysGamePage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
@@ -24,6 +25,14 @@ function App() {
           element={
             <ProtectedRoute>
               <SnakeGamePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/simon"
+          element={
+            <ProtectedRoute>
+              <SimonSaysGamePage />
             </ProtectedRoute>
           }
         />

@@ -24,15 +24,15 @@ export function AuthProvider({ children }) {
     setInitializing(false);
   }, []);
 
-  const persistUser = payload => {
+  const persistUser = useCallback(payload => {
     setUser(payload);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  };
+  }, []);
 
-  const clearUser = () => {
+  const clearUser = useCallback(() => {
     setUser(null);
     localStorage.removeItem(STORAGE_KEY);
-  };
+  }, []);
 
   const extractUser = data => data?.data?.user || data?.user || data?.data;
 
@@ -59,64 +59,81 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const login = useCallback(async (email, password) => {
-    setAuthBusy(true);
-    try {
-      const res = await fetch(`${baseUrl}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+  const authFetch = useCallback(
+    async (url, options = {}) => {
+      const res = await fetch(url, {
         credentials: "include",
-        body: JSON.stringify({ email, password }),
+        ...options,
       });
+      if (res.status === 401 || res.status === 403) {
+        clearUser();
+      }
+      return res;
+    },
+    [clearUser]
+  );
 
-      const data = await parseResponse(res);
-      handleAuthResponse(res, data, "Login failed");
+  const login = useCallback(
+    async (email, password) => {
+      setAuthBusy(true);
+      try {
+        const res = await authFetch(`${baseUrl}/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
 
-      const userData = extractUser(data);
-      if (!userData) throw new Error("User data missing from response");
+        const data = await parseResponse(res);
+        handleAuthResponse(res, data, "Login failed");
 
-      persistUser(userData);
-      return userData;
-    } finally {
-      setAuthBusy(false);
-    }
-  }, []);
+        const userData = extractUser(data);
+        if (!userData) throw new Error("User data missing from response");
 
-  const signup = useCallback(async payload => {
-    setAuthBusy(true);
-    try {
-      const res = await fetch(`${baseUrl}/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
+        persistUser(userData);
+        return userData;
+      } finally {
+        setAuthBusy(false);
+      }
+    },
+    [authFetch, persistUser]
+  );
 
-      const data = await parseResponse(res);
-      handleAuthResponse(res, data, "Signup failed");
+  const signup = useCallback(
+    async payload => {
+      setAuthBusy(true);
+      try {
+        const res = await authFetch(`${baseUrl}/signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-      const userData = extractUser(data);
-      if (!userData) throw new Error("User data missing from response");
+        const data = await parseResponse(res);
+        handleAuthResponse(res, data, "Signup failed");
 
-      persistUser(userData);
-      return userData;
-    } finally {
-      setAuthBusy(false);
-    }
-  }, []);
+        const userData = extractUser(data);
+        if (!userData) throw new Error("User data missing from response");
+
+        persistUser(userData);
+        return userData;
+      } finally {
+        setAuthBusy(false);
+      }
+    },
+    [authFetch, persistUser]
+  );
 
   const logout = useCallback(async () => {
     setAuthBusy(true);
     try {
-      await fetch(`${baseUrl}/logout`, {
+      await authFetch(`${baseUrl}/logout`, {
         method: "POST",
-        credentials: "include",
       });
     } finally {
       clearUser();
       setAuthBusy(false);
     }
-  }, []);
+  }, [authFetch, clearUser]);
 
   const value = useMemo(
     () => ({
@@ -127,8 +144,9 @@ export function AuthProvider({ children }) {
       signup,
       logout,
       setUser: persistUser,
+      authFetch,
     }),
-    [user, initializing, authBusy, login, signup, logout]
+    [user, initializing, authBusy, login, signup, logout, authFetch, persistUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
