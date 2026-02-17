@@ -1,11 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { API_URL } from "../utils/constants";
 
 const AuthContext = createContext(null);
 const STORAGE_KEY = "gauth_user";
+const hasStorage = typeof window !== "undefined" && "localStorage" in window;
 
-const rawBase = import.meta.env.VITE_AUTH_BASE_URL || "/api/v1/auth";
-const trimmedBase = rawBase.replace(/\/+$/, "");
-const baseUrl = trimmedBase.endsWith("/auth") ? trimmedBase : `${trimmedBase}/auth`;
+const baseUrl = `${API_URL.replace(/\/+$/, "")}/auth`;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -13,25 +13,42 @@ export function AuthProvider({ children }) {
   const [authBusy, setAuthBusy] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
+    if (!hasStorage) {
+      setInitializing(false);
+      return;
     }
-    setInitializing(false);
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        setUser(JSON.parse(stored));
+      }
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+    } finally {
+      setInitializing(false);
+    }
   }, []);
 
   const persistUser = useCallback(payload => {
     setUser(payload);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    if (hasStorage) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch {
+        /* ignore storage quota/availability errors */
+      }
+    }
   }, []);
 
   const clearUser = useCallback(() => {
     setUser(null);
-    localStorage.removeItem(STORAGE_KEY);
+    if (hasStorage) {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
+    }
   }, []);
 
   const extractUser = data => data?.data?.user || data?.user || data?.data;
@@ -40,7 +57,7 @@ export function AuthProvider({ children }) {
     let body = {};
     try {
       body = await res.json();
-    } catch (err) {
+    } catch {
       body = {};
     }
     return body;
@@ -61,14 +78,19 @@ export function AuthProvider({ children }) {
 
   const authFetch = useCallback(
     async (url, options = {}) => {
-      const res = await fetch(url, {
-        credentials: "include",
-        ...options,
-      });
-      if (res.status === 401 || res.status === 403) {
-        clearUser();
+      try {
+        const res = await fetch(url, {
+          credentials: "include",
+          ...options,
+        });
+        if (res.status === 401 || res.status === 403) {
+          clearUser();
+        }
+        return res;
+      } catch (err) {
+        // Normalize network errors so callers can show a friendly message
+        throw new Error(err?.message || "Network request failed");
       }
-      return res;
     },
     [clearUser]
   );

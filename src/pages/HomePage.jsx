@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { API_URL } from "../utils/constants";
 
-const apiBase = (
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_AUTH_BASE_URL ||
-  "http://localhost:9000/api/v1"
-).replace(/\/$/, "");
+const apiBase = API_URL.replace(/\/$/, "");
 
 const comingSoon = [
   { name: "Tetris Blitz", badge: "Coming soon" },

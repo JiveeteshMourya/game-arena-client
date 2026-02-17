@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import toast from "../../utils/toast";
 import { useAuth } from "../../context/AuthContext";
+import { API_URL } from "../../utils/constants";
 
 const BOARD_CELLS = 20; // 20x20 grid
 const INITIAL_SPEED = 220; // ms per tick
@@ -15,11 +16,7 @@ const MOBILE_CONTROLS = [
   { label: "↓", dir: "DOWN", blocked: "UP" },
 ];
 
-const apiBase = (
-  import.meta.env.VITE_API_BASE_URL ||
-  import.meta.env.VITE_AUTH_BASE_URL ||
-  "http://localhost:9000/api/v1"
-).replace(/\/$/, "");
+const apiBase = API_URL.replace(/\/$/, "");
 
 export default function SnakeGame() {
   const canvasRef = useRef(null);
