@@ -23,7 +23,7 @@ export default function Navbar() {
           to="/"
           className="text-lg font-semibold tracking-tight text-white transition hover:text-emerald-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
         >
-          IEHE Game Arena
+          I.E.H.E. Game Arena
         </Link>
 
         <div className="flex items-center gap-3">
