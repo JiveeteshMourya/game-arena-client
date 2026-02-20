@@ -6,6 +6,7 @@ import SignUpPage from "./pages/SignUpPage";
 import SnakeGamePage from "./pages/SnakeGamePage";
 import SimonSaysGamePage from "./pages/SimonSaysGamePage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
       </Routes>
+      <Analytics />
     </BrowserRouter>
   );
 }

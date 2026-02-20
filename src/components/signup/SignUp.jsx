@@ -71,7 +71,9 @@ export default function SignUp({ onSubmit }) {
     <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-950 px-4 py-8 text-slate-100">
       <div className="w-full max-w-md rounded-2xl bg-slate-900/80 p-8 shadow-xl shadow-slate-950/40 backdrop-blur">
         <header className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Create your account</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Create account to play
+          </h1>
           <p className="mt-1 text-sm text-slate-400">Fill in the details below to get started.</p>
         </header>
 
