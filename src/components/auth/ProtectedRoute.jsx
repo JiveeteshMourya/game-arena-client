@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
-export default function ProtectedRoute({ children, redirectTo = "/login" }) {
+export default function ProtectedRoute({ children, redirectTo = "/signup" }) {
   const { user, initializing } = useAuth();
 
   if (initializing) {

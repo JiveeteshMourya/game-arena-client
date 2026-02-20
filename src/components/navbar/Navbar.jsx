@@ -17,7 +17,7 @@ export default function Navbar() {
   const avatarLetter = (user?.username || user?.email || "U").charAt(0).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-800/70 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white shadow-lg shadow-black/25 backdrop-blur-lg">
+    <header className="sticky top-0 z-40 border-b border-slate-800/70 bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 text-white shadow-lg shadow-black/25 backdrop-blur-lg">
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link
           to="/"
