@@ -3,6 +3,7 @@ import toast from "../../utils/toast";
 import { useAuth } from "../../context/AuthContext";
 import { API_URL } from "../../utils/constants";
 
+// Gameplay tuning constants.
 const BOARD_CELLS = 20; // 20x20 grid
 const INITIAL_SPEED = 220; // ms per tick
 const SPEED_STEP = 10; // speed up per food until floor
@@ -16,9 +17,11 @@ const MOBILE_CONTROLS = [
   { label: "↓", dir: "DOWN", blocked: "UP" },
 ];
 
+// Normalize API base URL so endpoint joins don't produce double slashes.
 const apiBase = API_URL.replace(/\/$/, "");
 
 export default function SnakeGame() {
+  // Refs hold real-time game data used by the interval loop.
   const canvasRef = useRef(null);
   const loopRef = useRef(null);
   const snakeRef = useRef([{ x: 10, y: 10 }]);
@@ -29,6 +32,7 @@ export default function SnakeGame() {
   const runningRef = useRef(false);
   const gridSizeRef = useRef(20);
 
+  // State values drive rendered UI and controls.
   const [score, setScore] = useState(0);
   const [topPlayers, setTopPlayers] = useState([]);
   const [isPosting, setIsPosting] = useState(false);
@@ -37,6 +41,7 @@ export default function SnakeGame() {
 
   const { user, authFetch } = useAuth();
 
+  // Reset snake, direction, speed, and score for a fresh run.
   const resetGame = () => {
     snakeRef.current = [{ x: 10, y: 10 }];
     foodRef.current = randomFood(snakeRef.current);
@@ -46,6 +51,7 @@ export default function SnakeGame() {
     setScore(0);
   };
 
+  // Spawn food on a free board cell.
   const randomFood = snake => {
     while (true) {
       const pos = {
@@ -56,6 +62,7 @@ export default function SnakeGame() {
     }
   };
 
+  // Draw frame from current refs: board grid, food, then snake.
   const draw = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
@@ -92,6 +99,7 @@ export default function SnakeGame() {
     });
   };
 
+  // One simulation step: move, resolve collisions, handle food, redraw.
   const tick = () => {
     const snake = [...snakeRef.current];
     const head = { ...snake[0] };
@@ -133,6 +141,7 @@ export default function SnakeGame() {
     draw();
   };
 
+  // Interval loop lifecycle helpers.
   const startLoop = () => {
     runningRef.current = true;
     setRunning(true);
@@ -150,6 +159,7 @@ export default function SnakeGame() {
     startLoop();
   };
 
+  // Start only if not already running.
   const startGame = () => {
     if (runningRef.current) return;
     resetGame();
@@ -157,6 +167,7 @@ export default function SnakeGame() {
     startLoop();
   };
 
+  // End run and persist score.
   const endGame = () => {
     stopLoop();
     runningRef.current = false;
@@ -165,6 +176,7 @@ export default function SnakeGame() {
     postScore(scoreRef.current);
   };
 
+  // Save score for signed-in users, then refresh leaderboard.
   const postScore = async value => {
     if (!user?._id) return;
     setIsPosting(true);
@@ -192,6 +204,7 @@ export default function SnakeGame() {
     }
   };
 
+  // Defensive parsing for multiple leaderboard response shapes.
   const fetchTopPlayers = async () => {
     try {
       const res = await fetch(`${apiBase}/snake-game/top-ten`, {
@@ -211,6 +224,7 @@ export default function SnakeGame() {
     }
   };
 
+  // Keyboard controls prevent instant 180-degree reversal.
   const handleKey = e => {
     if (!runningRef.current) return;
     const dir = dirRef.current;
@@ -220,6 +234,7 @@ export default function SnakeGame() {
     if (e.key === "ArrowRight" && dir !== "LEFT") dirRef.current = "RIGHT";
   };
 
+  // Keep canvas size responsive while preserving square cells.
   const resizeCanvas = () => {
     const width = Math.min(MAX_CANVAS, Math.max(MIN_CANVAS, Math.floor(window.innerWidth * 0.9)));
     const cell = Math.max(12, Math.floor(width / BOARD_CELLS));
@@ -228,12 +243,14 @@ export default function SnakeGame() {
     setCanvasSize(canvasPixels);
   };
 
+  // Wire/unwire viewport resize listener.
   useEffect(() => {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
     return () => window.removeEventListener("resize", resizeCanvas);
   }, []);
 
+  // Apply canvas size, bind controls, fetch leaderboard, and cleanup loop/listeners.
   useEffect(() => {
     const canvas = canvasRef.current;
     canvas.width = canvasSize;
@@ -249,7 +266,7 @@ export default function SnakeGame() {
   }, [canvasSize]);
 
   return (
-    <section className="flex min-h-[calc(100vh-4rem)] flex-col items-center bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-900 px-4 py-6 text-slate-100">
+    <section className="flex min-h-[calc(100vh-4rem)] flex-col items-center bg-linear-to-br from-slate-950 via-slate-900 to-emerald-900 px-4 py-6 text-slate-100">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-5 lg:grid-cols-[280px_1fr_260px] lg:gap-6">
         <aside
           id="snake-guide"
@@ -345,7 +362,7 @@ export default function SnakeGame() {
             <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
               <button
                 onClick={startGame}
-                className="w-full rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow hover:bg-emerald-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+                className="w-full rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow hover:bg-emerald-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
                 disabled={running}
               >
                 {running ? "Running..." : "Start"}
@@ -360,7 +377,7 @@ export default function SnakeGame() {
                     toast.info("Resumed");
                   }
                 }}
-                className="w-full rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-100 hover:border-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:w-auto"
+                className="w-full rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-100 hover:border-slate-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:w-auto"
               >
                 {runningRef.current ? "Pause" : running ? "Paused" : "Resume"}
               </button>
@@ -370,7 +387,7 @@ export default function SnakeGame() {
                   resetGame();
                   draw();
                 }}
-                className="w-full rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-100 hover:border-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:w-auto"
+                className="w-full rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-100 hover:border-slate-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 sm:w-auto"
               >
                 Reset
               </button>

@@ -3,8 +3,10 @@ import toast from "../../utils/toast";
 import { useAuth } from "../../context/AuthContext";
 import { API_URL } from "../../utils/constants";
 
+// Normalize API base URL so endpoint joins don't produce double slashes.
 const apiBase = API_URL.replace(/\/$/, "");
 
+// Visual/audio pad metadata used to render and style each Simon button.
 const padConfigs = [
   {
     id: 0,
@@ -37,27 +39,37 @@ const padConfigs = [
 ];
 
 export default function SimonSaysGame() {
+  // Core gameplay state.
   const [sequence, setSequence] = useState([]);
   const [userStep, setUserStep] = useState(0);
   const [isPlayingBack, setIsPlayingBack] = useState(false);
   const [activePad, setActivePad] = useState(null);
   const [running, setRunning] = useState(false);
   const [score, setScore] = useState(0);
+
+  // Scoreboard + network state.
   const [topPlayers, setTopPlayers] = useState([]);
   const [isPosting, setIsPosting] = useState(false);
+
+  // Short "pressed" flash while player taps a pad.
   const [pressedPad, setPressedPad] = useState(null);
 
   const { user, authFetch } = useAuth();
+
+  // Keep timer IDs in refs so we can cancel them on reset/unmount.
   const playbackTimeouts = useRef([]);
   const nextRoundTimeout = useRef(null);
 
+  // Increase pace as sequence grows, but keep a minimum readable speed.
   const speed = useMemo(() => Math.max(450 - sequence.length * 12, 200), [sequence.length]);
 
+  // Cancel all pending playback timers.
   const clearPlayback = () => {
     playbackTimeouts.current.forEach(clearTimeout);
     playbackTimeouts.current = [];
   };
 
+  // Cancel the queued "start next round" timer.
   const clearNextRound = () => {
     if (nextRoundTimeout.current) {
       clearTimeout(nextRoundTimeout.current);
@@ -65,6 +77,7 @@ export default function SimonSaysGame() {
     }
   };
 
+  // Reset all game/UI state and clear pending timers.
   const resetGame = () => {
     clearPlayback();
     clearNextRound();
@@ -77,11 +90,13 @@ export default function SimonSaysGame() {
     setPressedPad(null);
   };
 
+  // Append one random pad to the sequence and restart input from step 0.
   const addStep = () => {
     setSequence(prev => [...prev, Math.floor(Math.random() * 4)]);
     setUserStep(0);
   };
 
+  // Play the current pattern by scheduling pad on/off flashes in order.
   const playback = seq => {
     setIsPlayingBack(true);
     clearPlayback();
@@ -94,6 +109,7 @@ export default function SimonSaysGame() {
     playbackTimeouts.current.push(done);
   };
 
+  // Whenever a new sequence is generated during a running game, replay it.
   useEffect(() => {
     if (sequence.length && running) {
       playback(sequence);
@@ -101,12 +117,14 @@ export default function SimonSaysGame() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sequence]);
 
+  // Start a fresh game and queue the first random step.
   const startGame = () => {
     resetGame();
     setRunning(true);
     setTimeout(addStep, 150);
   };
 
+  // Stop the game and persist score for signed-in users.
   const endGame = async () => {
     setRunning(false);
     clearPlayback();
@@ -117,6 +135,7 @@ export default function SimonSaysGame() {
     if (score > 0 && user?._id) {
       setIsPosting(true);
       try {
+        // Backend expects score as a query param on this endpoint.
         const url = `${apiBase}/simon-says-game/score/${user._id}?score=${score}`;
         const res = await authFetch(url, { method: "POST" });
         const data = await res.json().catch(() => ({}));
@@ -135,6 +154,7 @@ export default function SimonSaysGame() {
     }
   };
 
+  // Validate player input against the active sequence one step at a time.
   const handleUserPress = padId => {
     if (!running || isPlayingBack) return;
     setPressedPad(padId);
@@ -159,6 +179,7 @@ export default function SimonSaysGame() {
     }
   };
 
+  // Load leaderboard data; support a few response key variants defensively.
   const fetchTopPlayers = async () => {
     try {
       const res = await fetch(`${apiBase}/simon-says-game/top-ten`, {
@@ -178,6 +199,7 @@ export default function SimonSaysGame() {
     }
   };
 
+  // Initial leaderboard load + timer cleanup on unmount.
   useEffect(() => {
     fetchTopPlayers();
     return () => {
@@ -188,7 +210,7 @@ export default function SimonSaysGame() {
   }, []);
 
   return (
-    <section className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-6 text-slate-100">
+    <section className="min-h-[calc(100vh-4rem)] bg-linear-to-b from-slate-950 via-slate-900 to-slate-950 px-4 py-6 text-slate-100">
       <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-5 lg:grid-cols-[260px_1fr_240px] lg:gap-6">
         <aside
           id="simon-guide"
@@ -241,7 +263,7 @@ export default function SimonSaysGame() {
                   onClick={() => handleUserPress(pad.id)}
                   aria-pressed={isLit}
                   style={litStyle}
-                  className={`aspect-square w-full max-w-[160px] justify-self-center rounded-2xl bg-gradient-to-br ${pad.color} text-lg font-bold text-slate-950 shadow-lg shadow-slate-950/30 ring-4 transition duration-150 sm:max-w-[180px] ${
+                  className={`aspect-square w-full max-w-40 justify-self-center rounded-2xl bg-linear-to-br ${pad.color} text-lg font-bold text-slate-950 shadow-lg shadow-slate-950/30 ring-4 transition duration-150 sm:max-w-45 ${
                     isLit
                       ? `scale-95 brightness-125 saturate-125 ${pad.ringClass}`
                       : "opacity-95 ring-transparent"
@@ -257,7 +279,7 @@ export default function SimonSaysGame() {
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <button
               onClick={startGame}
-              className="w-full rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 sm:w-auto"
+              className="w-full rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-slate-900 shadow hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 sm:w-auto"
             >
               Start
             </button>
@@ -270,7 +292,7 @@ export default function SimonSaysGame() {
                   resetGame();
                 }
               }}
-              className="w-full rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-100 hover:border-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 sm:w-auto"
+              className="w-full rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-100 hover:border-slate-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400 sm:w-auto"
             >
               Reset
             </button>
