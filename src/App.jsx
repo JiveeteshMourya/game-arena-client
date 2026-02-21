@@ -14,7 +14,10 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route
+        <Route path="/snake" element={<SnakeGamePage />} />
+        <Route path="/simon" element={<SimonSaysGamePage />} />
+
+        {/* <Route
           path="/snake"
           element={
             <ProtectedRoute>
@@ -29,7 +32,8 @@ function App() {
               <SimonSaysGamePage />
             </ProtectedRoute>
           }
-        />
+        /> */}
+
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
       </Routes>

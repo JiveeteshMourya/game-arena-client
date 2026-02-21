@@ -262,7 +262,7 @@ export default function SnakeGame() {
       stopLoop();
       window.removeEventListener("keydown", handleKey);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    /// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasSize]);
 
   return (
